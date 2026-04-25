@@ -9,6 +9,8 @@ class NewsDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isCompact = screenWidth < 360;
     final String formattedDate = article.publishedAt == null
         ? 'Unknown publish date'
         : '${article.publishedAt!.year}-${article.publishedAt!.month.toString().padLeft(2, '0')}-${article.publishedAt!.day.toString().padLeft(2, '0')}';
@@ -18,6 +20,10 @@ class NewsDetailsScreen extends StatelessWidget {
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final bool isWide = constraints.maxWidth > 700;
+          final double imageHeight = (constraints.maxWidth * 0.55).clamp(
+            180.0,
+            280.0,
+          );
 
           return Align(
             alignment: Alignment.topCenter,
@@ -26,14 +32,19 @@ class NewsDetailsScreen extends StatelessWidget {
                 maxWidth: isWide ? 760 : constraints.maxWidth,
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+                padding: EdgeInsets.fromLTRB(
+                  isCompact ? 12 : 16,
+                  10,
+                  isCompact ? 12 : 16,
+                  20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: SizedBox(
-                        height: 220,
+                        height: imageHeight,
                         width: double.infinity,
                         child: article.urlToImage.isNotEmpty
                             ? Image.network(
@@ -52,8 +63,8 @@ class NewsDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       article.title,
-                      style: const TextStyle(
-                        fontSize: 26,
+                      style: TextStyle(
+                        fontSize: isCompact ? 22 : 26,
                         fontWeight: FontWeight.bold,
                         height: 1.2,
                       ),
@@ -85,7 +96,7 @@ class NewsDetailsScreen extends StatelessWidget {
                     Text(
                       article.description,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: isCompact ? 15 : 16,
                         height: 1.5,
                         color: Colors.grey.shade800,
                       ),
@@ -102,7 +113,7 @@ class NewsDetailsScreen extends StatelessWidget {
                     Text(
                       _sanitizeContent(article.content),
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: isCompact ? 15 : 16,
                         height: 1.6,
                         color: Colors.grey.shade900,
                       ),

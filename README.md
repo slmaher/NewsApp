@@ -25,7 +25,7 @@ Create a local `.env.json` file (already ignored by `.gitignore`):
 
 ```json
 {
-	"NEWS_API_KEY": "YOUR_REAL_KEY"
+  "NEWS_API_KEY": "YOUR_REAL_KEY"
 }
 ```
 

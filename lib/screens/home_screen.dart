@@ -64,107 +64,114 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('News App')),
-      body: Column(
-        children: <Widget>[
-          _SearchBar(
-            controller: _searchController,
-            onSearch: (String value) {
-              _searchQuery = value.trim();
-              _refreshNews();
-            },
-            onClear: () {
-              _searchController.clear();
-              _searchQuery = '';
-              _refreshNews();
-            },
-          ),
-          _CategoryFilter(
-            categories: _categories,
-            selectedCategory: _selectedCategory,
-            onCategorySelected: (String category) {
-              setState(() {
-                _selectedCategory = category;
-                _articlesFuture = _fetchArticles();
-              });
-            },
-          ),
-          Expanded(
-            child: FutureBuilder<List<Article>>(
-              future: _articlesFuture,
-              builder:
-                  (
-                    BuildContext context,
-                    AsyncSnapshot<List<Article>> snapshot,
-                  ) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (snapshot.hasError) {
-                      return _ErrorState(
-                        message: snapshot.error.toString().replaceFirst(
-                          'Exception: ',
-                          '',
-                        ),
-                        onRetry: _refreshNews,
-                      );
-                    }
-
-                    final List<Article> articles = snapshot.data ?? <Article>[];
-                    if (articles.isEmpty) {
-                      return const _EmptyState();
-                    }
-
-                    return RefreshIndicator(
-                      onRefresh: _pullToRefresh,
-                      child: LayoutBuilder(
-                        builder:
-                            (BuildContext context, BoxConstraints constraints) {
-                              final bool isWide = constraints.maxWidth > 700;
-                              final double cardMaxWidth = isWide
-                                  ? 720
-                                  : constraints.maxWidth;
-
-                              return ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(
-                                  12,
-                                  8,
-                                  12,
-                                  20,
-                                ),
-                                itemCount: articles.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final Article article = articles[index];
-
-                                  return Center(
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth: cardMaxWidth,
-                                      ),
-                                      child: _NewsCard(
-                                        article: article,
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute<void>(
-                                              builder: (_) => NewsDetailsScreen(
-                                                article: article,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                      ),
-                    );
-                  },
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            _SearchBar(
+              controller: _searchController,
+              onSearch: (String value) {
+                _searchQuery = value.trim();
+                _refreshNews();
+              },
+              onClear: () {
+                _searchController.clear();
+                _searchQuery = '';
+                _refreshNews();
+              },
             ),
-          ),
-        ],
+            _CategoryFilter(
+              categories: _categories,
+              selectedCategory: _selectedCategory,
+              onCategorySelected: (String category) {
+                setState(() {
+                  _selectedCategory = category;
+                  _articlesFuture = _fetchArticles();
+                });
+              },
+            ),
+            Expanded(
+              child: FutureBuilder<List<Article>>(
+                future: _articlesFuture,
+                builder:
+                    (
+                      BuildContext context,
+                      AsyncSnapshot<List<Article>> snapshot,
+                    ) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (snapshot.hasError) {
+                        return _ErrorState(
+                          message: snapshot.error.toString().replaceFirst(
+                            'Exception: ',
+                            '',
+                          ),
+                          onRetry: _refreshNews,
+                        );
+                      }
+
+                      final List<Article> articles = snapshot.data ?? <Article>[];
+                      if (articles.isEmpty) {
+                        return const _EmptyState();
+                      }
+
+                      return RefreshIndicator(
+                        onRefresh: _pullToRefresh,
+                        child: LayoutBuilder(
+                          builder: (
+                            BuildContext context,
+                            BoxConstraints constraints,
+                          ) {
+                            final bool isWide = constraints.maxWidth > 700;
+                            final bool isCompact = constraints.maxWidth < 360;
+                            final double horizontalPadding = isCompact ? 8 : 12;
+                            final double cardMaxWidth = isWide
+                                ? 720
+                                : constraints.maxWidth;
+
+                            return ListView.builder(
+                              padding: EdgeInsets.fromLTRB(
+                                horizontalPadding,
+                                8,
+                                horizontalPadding,
+                                20,
+                              ),
+                              itemCount: articles.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final Article article = articles[index];
+
+                                return Center(
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: cardMaxWidth,
+                                    ),
+                                    child: _NewsCard(
+                                      article: article,
+                                      compact: isCompact,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                            builder: (_) => NewsDetailsScreen(
+                                              article: article,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      );
+                    },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -183,18 +190,25 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isCompact = screenWidth < 360;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
+      padding: EdgeInsets.fromLTRB(isCompact ? 8 : 12, 8, isCompact ? 8 : 12, 6),
       child: TextField(
         controller: controller,
         textInputAction: TextInputAction.search,
         onSubmitted: onSearch,
+        style: TextStyle(fontSize: isCompact ? 14 : 15),
         decoration: InputDecoration(
           hintText: 'Search by keyword',
-          prefixIcon: const Icon(Icons.search_rounded),
+          hintStyle: TextStyle(fontSize: isCompact ? 14 : 15),
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(vertical: isCompact ? 11 : 13),
+          prefixIcon: Icon(Icons.search_rounded, size: isCompact ? 20 : 22),
           suffixIcon: IconButton(
             onPressed: onClear,
-            icon: const Icon(Icons.close_rounded),
+            icon: Icon(Icons.close_rounded, size: isCompact ? 20 : 22),
           ),
           filled: true,
           fillColor: Colors.white,
@@ -221,10 +235,13 @@ class _CategoryFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isCompact = screenWidth < 360;
+
     return SizedBox(
-      height: 48,
+      height: isCompact ? 44 : 48,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: EdgeInsets.symmetric(horizontal: isCompact ? 8 : 12),
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
         itemBuilder: (BuildContext context, int index) {
@@ -232,9 +249,15 @@ class _CategoryFilter extends StatelessWidget {
           final bool isSelected = category == selectedCategory;
 
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(right: isCompact ? 6 : 8),
             child: ChoiceChip(
-              label: Text(category[0].toUpperCase() + category.substring(1)),
+              label: Text(
+                category[0].toUpperCase() + category.substring(1),
+                style: TextStyle(fontSize: isCompact ? 12 : 13),
+              ),
+              visualDensity: isCompact
+                  ? const VisualDensity(horizontal: -2, vertical: -2)
+                  : VisualDensity.standard,
               selected: isSelected,
               onSelected: (_) => onCategorySelected(category),
             ),
@@ -246,29 +269,37 @@ class _CategoryFilter extends StatelessWidget {
 }
 
 class _NewsCard extends StatelessWidget {
-  const _NewsCard({required this.article, required this.onTap});
+  const _NewsCard({
+    required this.article,
+    required this.onTap,
+    this.compact = false,
+  });
 
   final Article article;
   final VoidCallback onTap;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
+    final double imageWidth = compact ? 88 : 110;
+    final double imageHeight = compact ? 80 : 90;
+
     return Card(
       color: Colors.white,
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: compact ? 10 : 12),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(compact ? 10 : 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(compact ? 10 : 12),
                 child: SizedBox(
-                  height: 90,
-                  width: 110,
+                  height: imageHeight,
+                  width: imageWidth,
                   child: article.urlToImage.isNotEmpty
                       ? Image.network(
                           article.urlToImage,
@@ -283,28 +314,30 @@ class _NewsCard extends StatelessWidget {
                       : _imagePlaceholder(),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: compact ? 10 : 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
                       article.title,
-                      maxLines: 2,
+                      maxLines: compact ? 3 : 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: compact ? 15 : 16,
                         fontWeight: FontWeight.w700,
+                        height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: compact ? 4 : 6),
                     Text(
                       article.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.grey.shade700,
-                        fontSize: 13,
+                        fontSize: compact ? 12 : 13,
+                        height: 1.3,
                       ),
                     ),
                   ],
