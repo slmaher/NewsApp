@@ -53,11 +53,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                               ? Image.network(
                                   article.urlToImage,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (
-                                    BuildContext context,
-                                    Object error,
-                                    StackTrace? stackTrace,
-                                  ) => _imagePlaceholder(),
+                                  errorBuilder:
+                                      (
+                                        BuildContext context,
+                                        Object error,
+                                        StackTrace? stackTrace,
+                                      ) => _imagePlaceholder(),
                                 )
                               : _imagePlaceholder(),
                         ),
@@ -123,7 +124,11 @@ class _EmptyFavoritesState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const <Widget>[
-            Icon(Icons.favorite_outline_rounded, size: 54, color: Colors.black45),
+            Icon(
+              Icons.favorite_outline_rounded,
+              size: 54,
+              color: Colors.black45,
+            ),
             SizedBox(height: 12),
             Text(
               'No favorites yet. Save articles using the heart icon.',

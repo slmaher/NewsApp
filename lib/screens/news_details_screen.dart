@@ -27,9 +27,7 @@ class NewsDetailsScreen extends StatelessWidget {
         title: const Text('Article Details'),
         actions: <Widget>[
           IconButton(
-            tooltip: isFavorite
-                ? 'Remove from favorites'
-                : 'Add to favorites',
+            tooltip: isFavorite ? 'Remove from favorites' : 'Add to favorites',
             onPressed: onToggleFavorite,
             icon: Icon(
               isFavorite

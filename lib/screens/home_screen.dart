@@ -193,30 +193,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                     20,
                                   ),
                                   itemCount: articles.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                        final Article article = articles[index];
+                                  itemBuilder: (BuildContext context, int index) {
+                                    final Article article = articles[index];
 
-                                        return Center(
-                                          child: ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                              maxWidth: cardMaxWidth,
-                                            ),
-                                            child: _NewsCard(
-                                              article: article,
-                                              compact: isCompact,
-                                              isFavorite: widget.isFavorite(
-                                                article,
-                                              ),
-                                              onToggleFavorite: () =>
-                                                  widget.onToggleFavorite(
-                                                    article,
-                                                  ),
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute<void>(
-                                                    builder: (_) => NewsDetailsScreen(
+                                    return Center(
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxWidth: cardMaxWidth,
+                                        ),
+                                        child: _NewsCard(
+                                          article: article,
+                                          compact: isCompact,
+                                          isFavorite: widget.isFavorite(
+                                            article,
+                                          ),
+                                          onToggleFavorite: () =>
+                                              widget.onToggleFavorite(article),
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute<void>(
+                                                builder: (_) =>
+                                                    NewsDetailsScreen(
                                                       article: article,
                                                       isFavorite: widget
                                                           .isFavorite(article),
@@ -226,13 +224,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                 article,
                                                               ),
                                                     ),
-                                                  ),
-                                                ).then((_) => setState(() {}));
-                                              },
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                              ),
+                                            ).then((_) => setState(() {}));
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                         ),
@@ -332,7 +330,12 @@ class _CategoryFilter extends StatelessWidget {
 
     if (useTwoRows) {
       return Padding(
-        padding: EdgeInsets.fromLTRB(isCompact ? 8 : 12, 0, isCompact ? 8 : 12, 6),
+        padding: EdgeInsets.fromLTRB(
+          isCompact ? 8 : 12,
+          0,
+          isCompact ? 8 : 12,
+          6,
+        ),
         child: Align(
           alignment: Alignment.centerLeft,
           child: Wrap(
