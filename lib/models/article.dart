@@ -24,10 +24,12 @@ class Article {
       title: (json['title'] as String?)?.trim().isNotEmpty == true
           ? (json['title'] as String).trim()
           : 'Untitled article',
-      description: (json['description'] as String?)?.trim() ??
+      description:
+          (json['description'] as String?)?.trim() ??
           'No short description available.',
       urlToImage: (json['urlToImage'] as String?)?.trim() ?? '',
-      content: (json['content'] as String?)?.trim() ??
+      content:
+          (json['content'] as String?)?.trim() ??
           'No detailed content available.',
       source: (sourceData?['name'] as String?)?.trim() ?? 'Unknown Source',
       publishedAt: DateTime.tryParse((json['publishedAt'] as String?) ?? ''),

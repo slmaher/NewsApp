@@ -63,9 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('News App'),
-      ),
+      appBar: AppBar(title: const Text('News App')),
       body: Column(
         children: <Widget>[
           _SearchBar(
@@ -93,58 +91,77 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: FutureBuilder<List<Article>>(
               future: _articlesFuture,
-              builder: (BuildContext context, AsyncSnapshot<List<Article>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+              builder:
+                  (
+                    BuildContext context,
+                    AsyncSnapshot<List<Article>> snapshot,
+                  ) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                if (snapshot.hasError) {
-                  return _ErrorState(
-                    message: snapshot.error.toString().replaceFirst('Exception: ', ''),
-                    onRetry: _refreshNews,
-                  );
-                }
+                    if (snapshot.hasError) {
+                      return _ErrorState(
+                        message: snapshot.error.toString().replaceFirst(
+                          'Exception: ',
+                          '',
+                        ),
+                        onRetry: _refreshNews,
+                      );
+                    }
 
-                final List<Article> articles = snapshot.data ?? <Article>[];
-                if (articles.isEmpty) {
-                  return const _EmptyState();
-                }
+                    final List<Article> articles = snapshot.data ?? <Article>[];
+                    if (articles.isEmpty) {
+                      return const _EmptyState();
+                    }
 
-                return RefreshIndicator(
-                  onRefresh: _pullToRefresh,
-                  child: LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
-                      final bool isWide = constraints.maxWidth > 700;
-                      final double cardMaxWidth = isWide ? 720 : constraints.maxWidth;
+                    return RefreshIndicator(
+                      onRefresh: _pullToRefresh,
+                      child: LayoutBuilder(
+                        builder:
+                            (BuildContext context, BoxConstraints constraints) {
+                              final bool isWide = constraints.maxWidth > 700;
+                              final double cardMaxWidth = isWide
+                                  ? 720
+                                  : constraints.maxWidth;
 
-                      return ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
-                        itemCount: articles.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final Article article = articles[index];
+                              return ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(
+                                  12,
+                                  8,
+                                  12,
+                                  20,
+                                ),
+                                itemCount: articles.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final Article article = articles[index];
 
-                          return Center(
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: cardMaxWidth),
-                              child: _NewsCard(
-                                article: article,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => NewsDetailsScreen(article: article),
+                                  return Center(
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: cardMaxWidth,
+                                      ),
+                                      child: _NewsCard(
+                                        article: article,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute<void>(
+                                              builder: (_) => NewsDetailsScreen(
+                                                article: article,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
                                   );
                                 },
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
+                              );
+                            },
+                      ),
+                    );
+                  },
             ),
           ),
         ],
@@ -256,11 +273,12 @@ class _NewsCard extends StatelessWidget {
                       ? Image.network(
                           article.urlToImage,
                           fit: BoxFit.cover,
-                          errorBuilder: (
-                            BuildContext context,
-                            Object error,
-                            StackTrace? stackTrace,
-                          ) => _imagePlaceholder(),
+                          errorBuilder:
+                              (
+                                BuildContext context,
+                                Object error,
+                                StackTrace? stackTrace,
+                              ) => _imagePlaceholder(),
                         )
                       : _imagePlaceholder(),
                 ),
@@ -321,7 +339,11 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Icon(Icons.error_outline_rounded, size: 48, color: Colors.redAccent),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 48,
+              color: Colors.redAccent,
+            ),
             const SizedBox(height: 12),
             Text(
               message,

@@ -35,8 +35,9 @@ class NewsApiService {
         ..['q'] = query!.trim();
     }
 
-    final uri = Uri.parse('${ApiConfig.baseUrl}/top-headlines')
-        .replace(queryParameters: params);
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/top-headlines',
+    ).replace(queryParameters: params);
 
     final response = await http.get(uri);
 

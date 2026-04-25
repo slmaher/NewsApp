@@ -22,7 +22,9 @@ class NewsDetailsScreen extends StatelessWidget {
           return Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: isWide ? 760 : constraints.maxWidth),
+              constraints: BoxConstraints(
+                maxWidth: isWide ? 760 : constraints.maxWidth,
+              ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
                 child: Column(
@@ -37,12 +39,12 @@ class NewsDetailsScreen extends StatelessWidget {
                             ? Image.network(
                                 article.urlToImage,
                                 fit: BoxFit.cover,
-                                errorBuilder: (
-                                  BuildContext context,
-                                  Object error,
-                                  StackTrace? stackTrace,
-                                ) =>
-                                    _bannerPlaceholder(),
+                                errorBuilder:
+                                    (
+                                      BuildContext context,
+                                      Object error,
+                                      StackTrace? stackTrace,
+                                    ) => _bannerPlaceholder(),
                               )
                             : _bannerPlaceholder(),
                       ),
@@ -61,14 +63,23 @@ class NewsDetailsScreen extends StatelessWidget {
                       spacing: 8,
                       runSpacing: 8,
                       children: <Widget>[
-                        _MetaChip(icon: Icons.public_rounded, text: article.source),
-                        _MetaChip(icon: Icons.calendar_today_rounded, text: formattedDate),
+                        _MetaChip(
+                          icon: Icons.public_rounded,
+                          text: article.source,
+                        ),
+                        _MetaChip(
+                          icon: Icons.calendar_today_rounded,
+                          text: formattedDate,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 18),
                     const Text(
                       'Description',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -82,7 +93,10 @@ class NewsDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 18),
                     const Text(
                       'Content',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -107,7 +121,11 @@ class NewsDetailsScreen extends StatelessWidget {
     return Container(
       color: const Color(0xFFE8EEF5),
       child: const Center(
-        child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.black45),
+        child: Icon(
+          Icons.broken_image_outlined,
+          size: 48,
+          color: Colors.black45,
+        ),
       ),
     );
   }
