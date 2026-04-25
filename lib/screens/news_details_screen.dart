@@ -3,9 +3,16 @@ import 'package:flutter/material.dart';
 import '../models/article.dart';
 
 class NewsDetailsScreen extends StatelessWidget {
-  const NewsDetailsScreen({super.key, required this.article});
+  const NewsDetailsScreen({
+    super.key,
+    required this.article,
+    required this.isFavorite,
+    required this.onToggleFavorite,
+  });
 
   final Article article;
+  final bool isFavorite;
+  final VoidCallback onToggleFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +23,23 @@ class NewsDetailsScreen extends StatelessWidget {
         : '${article.publishedAt!.year}-${article.publishedAt!.month.toString().padLeft(2, '0')}-${article.publishedAt!.day.toString().padLeft(2, '0')}';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Article Details')),
+      appBar: AppBar(
+        title: const Text('Article Details'),
+        actions: <Widget>[
+          IconButton(
+            tooltip: isFavorite
+                ? 'Remove from favorites'
+                : 'Add to favorites',
+            onPressed: onToggleFavorite,
+            icon: Icon(
+              isFavorite
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_border_rounded,
+              color: isFavorite ? Theme.of(context).colorScheme.error : null,
+            ),
+          ),
+        ],
+      ),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final bool isWide = constraints.maxWidth > 700;

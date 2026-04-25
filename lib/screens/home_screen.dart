@@ -2,10 +2,25 @@ import 'package:flutter/material.dart';
 
 import '../models/article.dart';
 import '../services/news_api_service.dart';
+import 'favorites_screen.dart';
 import 'news_details_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    required this.favorites,
+    required this.isFavorite,
+    required this.onToggleFavorite,
+    required this.isDarkMode,
+    required this.onThemeChanged,
+  });
+
+  final List<Article> favorites;
+  final bool Function(Article article) isFavorite;
+  final ValueChanged<Article> onToggleFavorite;
+  final bool isDarkMode;
+  final ValueChanged<bool> onThemeChanged;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -63,7 +78,42 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('News App')),
+      appBar: AppBar(
+        title: const Text('News App'),
+        actions: <Widget>[
+          IconButton(
+            tooltip: 'Favorites',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => FavoritesScreen(
+                    favorites: widget.favorites,
+                    isFavorite: widget.isFavorite,
+                    onToggleFavorite: widget.onToggleFavorite,
+                  ),
+                ),
+              ).then((_) => setState(() {}));
+            },
+            icon: const Icon(Icons.favorite_outline_rounded),
+          ),
+          IconButton(
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => SettingsScreen(
+                    isDarkMode: widget.isDarkMode,
+                    onThemeChanged: widget.onThemeChanged,
+                  ),
+                ),
+              ).then((_) => setState(() {}));
+            },
+            icon: const Icon(Icons.settings_outlined),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -111,7 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       }
 
-                      final List<Article> articles = snapshot.data ?? <Article>[];
+                      final List<Article> articles =
+                          snapshot.data ?? <Article>[];
                       if (articles.isEmpty) {
                         return const _EmptyState();
                       }
@@ -119,52 +170,71 @@ class _HomeScreenState extends State<HomeScreen> {
                       return RefreshIndicator(
                         onRefresh: _pullToRefresh,
                         child: LayoutBuilder(
-                          builder: (
-                            BuildContext context,
-                            BoxConstraints constraints,
-                          ) {
-                            final bool isWide = constraints.maxWidth > 700;
-                            final bool isCompact = constraints.maxWidth < 360;
-                            final double horizontalPadding = isCompact ? 8 : 12;
-                            final double cardMaxWidth = isWide
-                                ? 720
-                                : constraints.maxWidth;
+                          builder:
+                              (
+                                BuildContext context,
+                                BoxConstraints constraints,
+                              ) {
+                                final bool isWide = constraints.maxWidth > 700;
+                                final bool isCompact =
+                                    constraints.maxWidth < 360;
+                                final double horizontalPadding = isCompact
+                                    ? 8
+                                    : 12;
+                                final double cardMaxWidth = isWide
+                                    ? 720
+                                    : constraints.maxWidth;
 
-                            return ListView.builder(
-                              padding: EdgeInsets.fromLTRB(
-                                horizontalPadding,
-                                8,
-                                horizontalPadding,
-                                20,
-                              ),
-                              itemCount: articles.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final Article article = articles[index];
+                                return ListView.builder(
+                                  padding: EdgeInsets.fromLTRB(
+                                    horizontalPadding,
+                                    8,
+                                    horizontalPadding,
+                                    20,
+                                  ),
+                                  itemCount: articles.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                        final Article article = articles[index];
 
-                                return Center(
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth: cardMaxWidth,
-                                    ),
-                                    child: _NewsCard(
-                                      article: article,
-                                      compact: isCompact,
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute<void>(
-                                            builder: (_) => NewsDetailsScreen(
+                                        return Center(
+                                          child: ConstrainedBox(
+                                            constraints: BoxConstraints(
+                                              maxWidth: cardMaxWidth,
+                                            ),
+                                            child: _NewsCard(
                                               article: article,
+                                              compact: isCompact,
+                                              isFavorite: widget.isFavorite(
+                                                article,
+                                              ),
+                                              onToggleFavorite: () =>
+                                                  widget.onToggleFavorite(
+                                                    article,
+                                                  ),
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute<void>(
+                                                    builder: (_) => NewsDetailsScreen(
+                                                      article: article,
+                                                      isFavorite: widget
+                                                          .isFavorite(article),
+                                                      onToggleFavorite: () =>
+                                                          widget
+                                                              .onToggleFavorite(
+                                                                article,
+                                                              ),
+                                                    ),
+                                                  ),
+                                                ).then((_) => setState(() {}));
+                                              },
                                             ),
                                           ),
                                         );
                                       },
-                                    ),
-                                  ),
                                 );
                               },
-                            );
-                          },
                         ),
                       );
                     },
@@ -194,7 +264,12 @@ class _SearchBar extends StatelessWidget {
     final bool isCompact = screenWidth < 360;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(isCompact ? 8 : 12, 8, isCompact ? 8 : 12, 6),
+      padding: EdgeInsets.fromLTRB(
+        isCompact ? 8 : 12,
+        8,
+        isCompact ? 8 : 12,
+        6,
+      ),
       child: TextField(
         controller: controller,
         textInputAction: TextInputAction.search,
@@ -237,6 +312,37 @@ class _CategoryFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final bool isCompact = screenWidth < 360;
+    final bool useTwoRows = screenWidth <= 600;
+
+    Widget buildChip(String category) {
+      final bool isSelected = category == selectedCategory;
+
+      return ChoiceChip(
+        label: Text(
+          category[0].toUpperCase() + category.substring(1),
+          style: TextStyle(fontSize: isCompact ? 12 : 13),
+        ),
+        visualDensity: isCompact
+            ? const VisualDensity(horizontal: -2, vertical: -2)
+            : VisualDensity.standard,
+        selected: isSelected,
+        onSelected: (_) => onCategorySelected(category),
+      );
+    }
+
+    if (useTwoRows) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(isCompact ? 8 : 12, 0, isCompact ? 8 : 12, 6),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Wrap(
+            spacing: isCompact ? 6 : 8,
+            runSpacing: isCompact ? 6 : 8,
+            children: categories.map(buildChip).toList(),
+          ),
+        ),
+      );
+    }
 
     return SizedBox(
       height: isCompact ? 44 : 48,
@@ -246,21 +352,10 @@ class _CategoryFilter extends StatelessWidget {
         itemCount: categories.length,
         itemBuilder: (BuildContext context, int index) {
           final String category = categories[index];
-          final bool isSelected = category == selectedCategory;
 
           return Padding(
             padding: EdgeInsets.only(right: isCompact ? 6 : 8),
-            child: ChoiceChip(
-              label: Text(
-                category[0].toUpperCase() + category.substring(1),
-                style: TextStyle(fontSize: isCompact ? 12 : 13),
-              ),
-              visualDensity: isCompact
-                  ? const VisualDensity(horizontal: -2, vertical: -2)
-                  : VisualDensity.standard,
-              selected: isSelected,
-              onSelected: (_) => onCategorySelected(category),
-            ),
+            child: buildChip(category),
           );
         },
       ),
@@ -272,11 +367,15 @@ class _NewsCard extends StatelessWidget {
   const _NewsCard({
     required this.article,
     required this.onTap,
+    required this.onToggleFavorite,
+    required this.isFavorite,
     this.compact = false,
   });
 
   final Article article;
   final VoidCallback onTap;
+  final VoidCallback onToggleFavorite;
+  final bool isFavorite;
   final bool compact;
 
   @override
@@ -338,6 +437,25 @@ class _NewsCard extends StatelessWidget {
                         color: Colors.grey.shade700,
                         fontSize: compact ? 12 : 13,
                         height: 1.3,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: isFavorite
+                            ? 'Remove from favorites'
+                            : 'Add to favorites',
+                        onPressed: onToggleFavorite,
+                        icon: Icon(
+                          isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: isFavorite
+                              ? Theme.of(context).colorScheme.error
+                              : null,
+                          size: compact ? 20 : 22,
+                        ),
                       ),
                     ),
                   ],
